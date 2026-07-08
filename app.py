@@ -1,6 +1,6 @@
 import streamlit as st
 
-# 網頁初始化設定
+# 1. 網頁初始化設定
 st.set_page_config(
     page_title="115會考基北區落點計算機",
     page_icon="🎓",
@@ -8,7 +8,7 @@ st.set_page_config(
 )
 
 def get_score_and_points(grade):
-    # 基北區官方對照表：A++=7, A+=6, A=5, B++=4, B+=3, B=2, C=1
+    # 基北區官方對照標準：A++=7, A+=6, A=5, B++=4, B+=3, B=2, C=1
     mapping = {
         "A++": (7, 7), "A+": (6, 6), "A": (5, 5),
         "B++": (4, 4), "B+": (3, 3), "B": (2, 2),
@@ -16,13 +16,13 @@ def get_score_and_points(grade):
     }
     return mapping.get(grade, (0, 0))
 
-# 網頁標頭與介紹
+# 2. 網頁標頭
 st.title("🎓 115 年國中會考成績落點計算機")
 st.markdown("### 🏛️ 基北區專用（積分/積點一條龍自動估算面板）")
 st.write("請在下方輸入您的各科答對題數，網頁會即時為您進行精準的加權與落點分析。")
 st.divider()
 
-# 使用者輸入區塊
+# 3. 使用者輸入區塊
 st.subheader("📝 第一步：請輸入各科作答數據")
 col1, col2 = st.columns(2)
 
@@ -38,11 +38,12 @@ with col1:
 with col2:
     social_correct = st.number_input("社會科答對題數 (0~54)", min_value=0, max_value=54, value=52)
     nature_correct = st.number_input("自然科答對題數 (0~50)", min_value=0, max_value=50, value=48)
+    # 最新版格式相容：將 options 的數值清單補齊
     essay_grade = st.selectbox("寫作測驗得分 (0~6 級分)", options=[0, 1, 2, 3, 4, 5, 6], index=5)
 
 st.divider()
 
-# 等級與加權計算
+# 4. 五科等級與加權計算邏輯
 if chinese_correct >= 40: grade_ch = "A++"
 elif chinese_correct == 39: grade_ch = "A+"
 elif chinese_correct >= 36: grade_ch = "A"
@@ -88,7 +89,7 @@ else: grade_na = "C"
 essay_mapping_score = {6: 1.0, 5: 0.8, 4: 0.6, 3: 0.4, 2: 0.2, 1: 0.1, 0: 0.0}
 essay_score = essay_mapping_score.get(essay_grade, 0.0)
 
-# 分數加總
+# 5. 分數與點數加總
 sc_ch, pt_ch = get_score_and_points(grade_ch)
 sc_math, pt_math = get_score_and_points(grade_math)
 sc_eng, pt_eng = get_score_and_points(grade_English)
@@ -98,7 +99,7 @@ sc_na, pt_na = get_score_and_points(grade_na)
 total_score = sc_ch + sc_math + sc_eng + sc_sc + sc_na + essay_score
 total_points = pt_ch + pt_math + pt_eng + pt_sc + pt_na
 
-# 顯示儀表板
+# 6. 渲染結果儀表板
 st.subheader("📊 第二步：即時分析結果報告")
 m1, m2 = st.columns(2)
 m1.metric(label="💡 基北區會考總積分 (滿分 36)", value=f"{total_score:.1f} 分")
@@ -107,10 +108,10 @@ m2.metric(label="🎯 基北區會考總積點 (滿分 35)", value=f"{total_poin
 st.markdown("#### 🔍 各科等級明細")
 grid1, grid2, grid3 = st.columns(3)
 grid1.write(f"📘 **國文**：`{grade_ch}`")
-grid1.write(f"📙 **社會**：`{grade_sc}`")
+grid1.write(f" Ester **社會**：`{grade_sc}`")
 grid2.write(f"📐 **數學**：`{grade_math}` *(加權 {mathscore} 分)*")
 grid2.write(f"🔬 **自然**：`{grade_na}`")
 grid3.write(f"🔤 **英語**：`{grade_English}` *(加權 {Englishscore} 分)*")
 grid3.write(f"✍️ **寫作**：`{essay_grade} 級分`")
 
-st.balloons()  # 每當調整分數時，網頁會自動噴出歡慶氣球動畫！
+st.toast("🎉 成績更新成功！")
